@@ -17,6 +17,8 @@ define([
 			me.dataCount = tpl.getJsonCount();
 			me.ids = tpl.getIds();
 			me.currentIndex = 1;
+			me.running = false;    //处理多次点击
+			me.answerClick = false;
 			me.render();
 			me._initEvent();
 		},
@@ -55,6 +57,9 @@ define([
 				jqWordBigImg = me.jqWordItem.find('.word-big-img'),
 				jqImgEl = me.jqWordItem.find('.word-big-img .img-el');
 			
+			if(me.running) return;
+			me.running = true;
+
 			then(function(defer){
 				jqWordBigImg.addClass('img-animate');
 				defer();
@@ -84,6 +89,8 @@ define([
 			})
 			.then(function(defer){
 				audio.playSetence(me.ids[me.currentIndex]);
+				me.running = false;
+				me.answerClick = false;
 			});
 		},
 		render: function(){
@@ -121,41 +128,70 @@ define([
 			var me = Page,
 				index = me.currentIndex <= 1 ? 1 : me.currentIndex;
 
-			if(me.currentIndex == 1){
-				tar.addClass('disable-pre-btn');
-				return;
-			}
+			if(me.running) return;
+			me.running = true;
+			then(function(defer){
+				if(me.currentIndex == 1){
+					tar.addClass('disable-pre-btn');
+					me.running = false;
+					me.answerClick = false;
+					alert('这是第一题了哦');
+					return false;
+				}
 
-			me.currentIndex = me.currentIndex <= 1 ? 1 : me.currentIndex - 1;
+				me.currentIndex = me.currentIndex <= 1 ? 1 : me.currentIndex - 1;
 
-			me.clearResult();
-			tar.removeClass('disable-pre-btn');
-			$('.next-btn').removeClass('disable-next-btn');
-			$('.words-list .word-item-show').removeClass('word-item-show');
-			$('#word-item-' + me.ids[index]).removeClass('word-item-hide');
-			$('#word-item-' + me.ids[me.currentIndex]).addClass('word-item-show');
-			$('.active').removeClass('active');
-			$('.nav-dot-' + me.currentIndex).addClass('active');
-			audio.playWord(me.ids[me.currentIndex]);
+				me.clearResult();
+				tar.removeClass('disable-pre-btn');
+				$('.next-btn').removeClass('disable-next-btn');
+				$('.words-list .word-item-show').removeClass('word-item-show');
+				$('#word-item-' + me.ids[index]).removeClass('word-item-hide');
+				$('#word-item-' + me.ids[me.currentIndex]).addClass('word-item-show');
+				$('.active').removeClass('active');
+				$('.nav-dot-' + me.currentIndex).addClass('active');
+				audio.playWord(me.ids[me.currentIndex]);
+				defer();
+			})
+			.then(function(defer){
+				setTimeout(function(){
+					me.running = false;
+				}, 500);
+			});
+			
 		},	
 		_hanlderNext: function(tar){
 			var me = Page;
 
-			if(me.currentIndex == me.dataCount){
-				tar.addClass('disable-next-btn');
-				return;
-			}
+			if(me.running) return;
+			me.running = true;
 
-			me.currentIndex = me.currentIndex >= me.dataCount ? me.dataCount : me.currentIndex + 1;
+			then(function(defer){
+				if(me.currentIndex == me.dataCount){
+					tar.addClass('disable-next-btn');
+					me.running = false;
+					me.answerClick = false;
+					alert('这是最后一题了哦');
+					return;
+				}
 
-			me.clearResult();
-			tar.removeClass('disable-next-btn');
-			$('.pre-btn').removeClass('disable-pre-btn');
-			$('.words-list .word-item-show').removeClass('word-item-show').addClass('word-item-hide');
-			$('#word-item-' + me.ids[me.currentIndex]).addClass('word-item-show');
-			$('.active').removeClass('active');
-			$('.nav-dot-' + me.currentIndex).addClass('active');
-			audio.playWord(me.ids[me.currentIndex]);
+				me.currentIndex = me.currentIndex >= me.dataCount ? me.dataCount : me.currentIndex + 1;
+
+				me.clearResult();
+				tar.removeClass('disable-next-btn');
+				$('.pre-btn').removeClass('disable-pre-btn');
+				$('.words-list .word-item-show').removeClass('word-item-show').addClass('word-item-hide');
+				$('#word-item-' + me.ids[me.currentIndex]).addClass('word-item-show');
+				$('.active').removeClass('active');
+				$('.nav-dot-' + me.currentIndex).addClass('active');
+				audio.playWord(me.ids[me.currentIndex]);
+				defer();
+			})
+			.then(function(defer){
+				setTimeout(function(){
+					me.running = false;
+					me.answerClick = false;
+				}, 500);
+			})
 		},
 		_changeStatus: function(){
 			var me = Page;
@@ -207,6 +243,9 @@ define([
 			var me = Page,
 				id = tar.data('id');
 
+			if(me.answerClick) return;
+			me.answerClick = true;
+
 			me.jqWordItem = $('#word-item-' + me.ids[me.currentIndex]);
 			if(id == me.ids[me.currentIndex]){
 				tar.find('.result').removeClass('wrong').addClass('right');
@@ -227,7 +266,7 @@ define([
 							me._initImgAnimate();
 						}, 1500);
 					});
-				}, 1000);
+				}, 800);
 			}
 		},
 		clearResult: function(){

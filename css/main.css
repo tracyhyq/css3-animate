@@ -3,6 +3,19 @@
 * {
 	padding: 0;
 	margin: 0;
+	-webkit-transform: translate3d(0,0,0);
+	-moz-transform: translate3d(0,0,0);
+	-ms-transform: translate3d(0,0,0);
+	-o-transform: translate3d(0,0,0);
+	transform: translate3d(0,0,0);
+	-webkit-backface-visibility: hidden;
+	-moz-backface-visibility: hidden;
+	-ms-backface-visibility: hidden;
+	backface-visibility: hidden;
+	-webkit-perspective: 2000;
+	-moz-perspective: 2000;
+	-ms-perspective: 2000;
+	perspective: 2000;
 }
 
 body {
@@ -387,7 +400,7 @@ ul, li {
 	width: 630px;
 	margin-left: -315px;
 	position: absolute;
-	top: 550px;
+	top: 570px;
 	left: 50%;
 	z-index: 3;
 	height: 1px;
